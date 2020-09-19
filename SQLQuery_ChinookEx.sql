@@ -126,15 +126,158 @@ group by Playlist.PlaylistId, Playlist.Name
 
 
 
---16. `tracks_no_id.sql`: Provide a query that shows all the Tracks, but displays no IDs. The result should include the Album name, Media type and Genre.
+--16. `tracks_no_id.sql`: Provide a query that shows all the Tracks, but displays no IDs. 
+--The result should include the Album name, Media type and Genre.
+select tr.Name as TrackName, al.Title as AlbumTitle, mt.Name as MediaType, g.Name as Genre
+from Track tr
+	join Album al
+	on tr.AlbumId = al.AlbumId
+		join MediaType mt
+		on tr.MediaTypeId = mt.MediaTypeId
+			join Genre g
+			on tr.GenreId = g.GenreId
+
 --17. `invoices_line_item_count.sql`: Provide a query that shows all Invoices but includes the # of invoice line items.
+--ANCA: Using a CORRELATED SUBQUERY HERE!!
+select Invoice.*,
+	(select  count(1)
+	from InvoiceLine
+	where Invoice.InvoiceId = InvoiceLine.InvoiceId
+	) as CountOfInvoiceLines
+from Invoice
+
+
 --18. `sales_agent_total_sales.sql`: Provide a query that shows total sales made by each sales agent.
---19. `top_2009_agent.sql`: Which sales agent made the most in sales in 2009? HINT: [TOP](https://docs.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql)
+select emp.FirstName + ' ' + emp.LastName as [Employee Name],
+	(select sum(Total)
+		from Invoice inv
+			join Customer cust
+			on inv.CustomerId = cust.CustomerId
+		where cust.SupportRepId = emp.EmployeeId 
+	) as TotalSalesByEmployee
+from Employee emp
+where emp.Title like 'sales support agent'
+
+select *
+from Employee
+
+
+--19. `top_2009_agent.sql`: Which sales agent made the most in sales in 2009? 
+--HINT: [TOP](https://docs.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql)
+select Top 1 emp.FirstName + ' ' + emp.LastName as [Employee Name],
+	(select sum(Total)
+		from Invoice inv
+			join Customer cust
+			on inv.CustomerId = cust.CustomerId	
+		where cust.SupportRepId = emp.EmployeeId and Year(inv.InvoiceDate) = 2009
+		) as TotalSales
+from Employee emp
+order by TotalSales desc
+
+select *
+from Employee
+
 --20. `top_agent.sql`: Which sales agent made the most in sales over all?
+
+select Top 1 emp.FirstName + ' ' + emp.LastName as [Employee Name],
+	(select sum(Total)
+		from Invoice inv
+			join Customer cust
+			on inv.CustomerId = cust.CustomerId	
+		where cust.SupportRepId = emp.EmployeeId
+		) as TotalSales
+from Employee emp
+order by TotalSales desc
+
 --21. `sales_agent_customer_count.sql`: Provide a query that shows the count of customers assigned to each sales agent.
+select emp.FirstName + ' ' + emp.LastName as [Employee Name], emp.EmployeeId,
+	(select count(1)
+	from Customer cust
+	where cust.SupportRepId = emp.EmployeeId
+	) as CustomerCount
+from Employee emp
+where emp.Title like 'sales support agent'
+
+--Anca: running query below to check results:
+select *
+from Customer
+where SupportRepId = 3
+
 --22. `sales_per_country.sql`: Provide a query that shows the total sales per country.
+select BillingCountry, sum(Total) as TotalSales
+from Invoice
+group by BillingCountry
+order by TotalSales
+
 --23. `top_country.sql`: Which country's customers spent the most?
---24. `top_2013_track.sql`: Provide a query that shows the most purchased track of 2013.
+select Top 1 BillingCountry, sum(Total) as TotalSales
+from Invoice
+group by BillingCountry
+order by TotalSales desc
+
+--24. `top_2013_track.sql`: Provide a query that shows the most purchased track of 2013. ANCA: MIGHT NOT BE CORRECT!!!
+select Top 1 count(1) as CountOfTrackPurchases, InvoiceLine.TrackId, Track.Name
+--select *
+from InvoiceLine
+	join Invoice
+	on Invoice.InvoiceId = InvoiceLine.InvoiceId
+		join Track
+		on InvoiceLine.TrackId = Track.TrackId
+where Year(Invoice.InvoiceDate) = 2013
+group by InvoiceLine.TrackId, Track.Name
+order by CountOfTrackPurchases desc
+--ANCA: This doesn't seem quite accurate ... if all have a count of 1 - shouldn't it show all the tracks??
+
+select *
+from InvoiceLine
+where InvoiceLine.TrackId = 443
+
+select *
+from Track
+where Track.Name like 'shock me'
+
 --25. `top_5_tracks.sql`: Provide a query that shows the top 5 most purchased songs.
+
+select Top 5 count(1) as TimesSold, InvoiceLine.TrackId, Track.Name
+from InvoiceLine
+	join Track
+	on InvoiceLine.TrackId = Track.TrackId
+group by invoiceLine.TrackId, track.Name
+order by TimesSold desc
+
+--ANCA: suggestion from Nathan below - need to work on it....
+--select InvoiceLine.TrackId
+--from InvoiceLine
+--where InvoiceLine.TrackId = (select Top 1 count(1) TimesSold
+--								from InvoiceLine
+--								order by TrackId)
+
+
+
 --26. `top_3_artists.sql`: Provide a query that shows the top 3 best selling artists.
+select top 3 count(1) as TracksSold, sum(InvoiceLine.UnitPrice) as TotalSalesByArtist, Artist.Name
+from InvoiceLine
+	join Track
+	on InvoiceLine.TrackId = Track.TrackId
+		join Album
+		on Track.AlbumId = Album.AlbumId
+			join Artist
+			on Album.ArtistId = Artist.ArtistId
+group by Artist.ArtistId, Artist.Name
+order by TotalSalesByArtist desc
+
+select *
+from InvoiceLine
+where UnitPrice != '0.99'
+
+--Anca: since not all tracks are the same price, we will calculate total sales by artist too - see above
+
+
 --27. `top_media_type.sql`: Provide a query that shows the most purchased Media Type.
+select count(1) as TimesSold, MediaType.Name
+from InvoiceLine
+	join Track
+	on InvoiceLine.TrackId = Track.TrackId
+		join MediaType
+		on Track.MediaTypeId = MediaType.MediaTypeId
+group by Track.MediaTypeId, MediaType.Name
