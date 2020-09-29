@@ -215,7 +215,7 @@ from Invoice
 group by BillingCountry
 order by TotalSales desc
 
---24. `top_2013_track.sql`: Provide a query that shows the most purchased track of 2013. ANCA: MIGHT NOT BE CORRECT!!!
+--24. `top_2013_track.sql`: Provide a query that shows the most purchased track of 2013. ANCA: This is correct - they were all sold only once ...
 select Top 1 count(1) as CountOfTrackPurchases, InvoiceLine.TrackId, Track.Name
 --select *
 from InvoiceLine
@@ -254,8 +254,9 @@ order by TimesSold desc
 
 
 
---26. `top_3_artists.sql`: Provide a query that shows the top 3 best selling artists.
-select top 3 count(1) as TracksSold, sum(InvoiceLine.UnitPrice) as TotalSalesByArtist, Artist.Name
+--26. `top_3_artists.sql`: Provide a query that shows the top 3 best selling artists. We should add the multiplication by quantity - even though in this case it doesn't matter because all the tracks got sold only once:
+select top 3 count(1) as TracksSold, sum(InvoiceLine.UnitPrice * InvoiceLine.Quantity) as TotalSalesByArtist, Artist.Name
+--select *
 from InvoiceLine
 	join Track
 	on InvoiceLine.TrackId = Track.TrackId
@@ -264,10 +265,12 @@ from InvoiceLine
 			join Artist
 			on Album.ArtistId = Artist.ArtistId
 group by Artist.ArtistId, Artist.Name
-order by TotalSalesByArtist desc
+--order by TotalSalesByArtist desc
+order by 2 desc --ANCA: You can also order using the column number for the column you want to use!!!
 
 select *
 from InvoiceLine
+--where Quantity != 1
 where UnitPrice != '0.99'
 
 --Anca: since not all tracks are the same price, we will calculate total sales by artist too - see above
