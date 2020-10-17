@@ -13,7 +13,7 @@ where cust.Country = 'Brazil'
 select cust.FirstName, cust.LastName, inv.InvoiceId, inv.InvoiceDate, inv.BillingCountry
 from invoice inv
 	join customer cust
-	on inv.CustomerId = cust.CustomerId
+		on inv.CustomerId = cust.CustomerId
 where cust.Country = 'Brazil'
 
 --4. `sales_agents.sql`: Provide a query showing only the Employees who are Sales Agents.
@@ -30,19 +30,19 @@ from invoice inv
 select cust.SupportRepId, emp.FirstName, emp.LastName, inv.InvoiceId, inv.InvoiceDate, cust.Company, cust.FirstName, cust.LastName
 from customer cust
 	join employee emp
-	on cust.SupportRepId = emp.EmployeeId
-		join invoice inv
-		on cust.CustomerId = inv.CustomerId
+		on cust.SupportRepId = emp.EmployeeId
+			join invoice inv
+				on cust.CustomerId = inv.CustomerId
 
 
 --7. `invoice_totals.sql`: Provide a query that shows the Invoice Total, Customer name, Country and Sale Agent name for all invoices and customers.
---ANCA: for all invoices and customers - IS left join right??
+--ANCA: for all invoices and customers - Is left join right??
 select inv.Total, cust.FirstName, cust.LastName, cust.Country, emp.FirstName, emp.LastName
 from invoice inv
 	left join customer cust
-	on inv.CustomerId = cust.CustomerId
-		join employee emp
-		on emp.EmployeeId = cust.SupportRepId
+		on inv.CustomerId = cust.CustomerId
+			join employee emp
+				on emp.EmployeeId = cust.SupportRepId
 	
 
 
@@ -86,11 +86,11 @@ from InvoiceLine invline
 select invline.InvoiceLineId, tr.Name as [Track Title], ar.Name as [Artist Name]
 from InvoiceLine invline
 	join Track tr
-	on invline.TrackId = tr.TrackId
+		on invline.TrackId = tr.TrackId
 			join Album al
-			on tr.AlbumId = al.AlbumId
-				join Artist ar
-				on al.ArtistId = ar.ArtistId
+				on tr.AlbumId = al.AlbumId
+					join Artist ar
+						on al.ArtistId = ar.ArtistId
 order by invline.InvoiceLineId
 
 --14. `country_invoices.sql`: Provide a query that shows the # of invoices per country. 
@@ -105,23 +105,22 @@ group by BillingCountry
 select count(1) as CountOfTracks, Playlist.Name
 from PlaylistTrack
 	join Playlist
-	on Playlist.PlaylistId = PlaylistTrack.PlaylistId
+		on Playlist.PlaylistId = PlaylistTrack.PlaylistId
 group by Playlist.PlaylistId
 order by CountOfTracks
 
 select count(1) as CountOfTracks, PlaylistTrack.PlaylistId
 from PlaylistTrack
 	join Playlist
-	on Playlist.PlaylistId = PlaylistTrack.PlaylistId
+		on Playlist.PlaylistId = PlaylistTrack.PlaylistId
 group by PlaylistTrack.PlaylistId
 order by CountOfTracks
 
 --ANCA: The results in the 2 queries above are different because there are 2 playlists with the same name of 'Music' and 2 with the name 'Movies'
---ANCA: How can I group by ID BUT display the name???
 select count(1) as TracksInPlaylist, Playlist.PlaylistId, Playlist.Name
 from Playlist
 	join PlaylistTrack
-	on Playlist.PlaylistId = PlaylistTrack.PlaylistId
+		on Playlist.PlaylistId = PlaylistTrack.PlaylistId
 group by Playlist.PlaylistId, Playlist.Name
 
 
@@ -131,11 +130,11 @@ group by Playlist.PlaylistId, Playlist.Name
 select tr.Name as TrackName, al.Title as AlbumTitle, mt.Name as MediaType, g.Name as Genre
 from Track tr
 	join Album al
-	on tr.AlbumId = al.AlbumId
-		join MediaType mt
-		on tr.MediaTypeId = mt.MediaTypeId
-			join Genre g
-			on tr.GenreId = g.GenreId
+		on tr.AlbumId = al.AlbumId
+			join MediaType mt
+			on tr.MediaTypeId = mt.MediaTypeId
+				join Genre g
+					on tr.GenreId = g.GenreId
 
 --17. `invoices_line_item_count.sql`: Provide a query that shows all Invoices but includes the # of invoice line items.
 --ANCA: Using a CORRELATED SUBQUERY HERE!!
@@ -152,7 +151,7 @@ select emp.FirstName + ' ' + emp.LastName as [Employee Name],
 	(select sum(Total)
 		from Invoice inv
 			join Customer cust
-			on inv.CustomerId = cust.CustomerId
+				on inv.CustomerId = cust.CustomerId
 		where cust.SupportRepId = emp.EmployeeId 
 	) as TotalSalesByEmployee
 from Employee emp
@@ -168,7 +167,7 @@ select Top 1 emp.FirstName + ' ' + emp.LastName as [Employee Name],
 	(select sum(Total)
 		from Invoice inv
 			join Customer cust
-			on inv.CustomerId = cust.CustomerId	
+				on inv.CustomerId = cust.CustomerId	
 		where cust.SupportRepId = emp.EmployeeId and Year(inv.InvoiceDate) = 2009
 		) as TotalSales
 from Employee emp
@@ -183,7 +182,7 @@ select Top 1 emp.FirstName + ' ' + emp.LastName as [Employee Name],
 	(select sum(Total)
 		from Invoice inv
 			join Customer cust
-			on inv.CustomerId = cust.CustomerId	
+				on inv.CustomerId = cust.CustomerId	
 		where cust.SupportRepId = emp.EmployeeId
 		) as TotalSales
 from Employee emp
@@ -220,13 +219,13 @@ select Top 1 count(1) as CountOfTrackPurchases, InvoiceLine.TrackId, Track.Name
 --select *
 from InvoiceLine
 	join Invoice
-	on Invoice.InvoiceId = InvoiceLine.InvoiceId
-		join Track
-		on InvoiceLine.TrackId = Track.TrackId
+		on Invoice.InvoiceId = InvoiceLine.InvoiceId
+			join Track
+				on InvoiceLine.TrackId = Track.TrackId
 where Year(Invoice.InvoiceDate) = 2013
 group by InvoiceLine.TrackId, Track.Name
 order by CountOfTrackPurchases desc
---ANCA: This doesn't seem quite accurate ... if all have a count of 1 - shouldn't it show all the tracks??
+--ANCA: This doesn't seem quite accurate ... if all have a count of 1 - shouldn't it show all the tracks?? Nope!
 
 select *
 from InvoiceLine
@@ -241,11 +240,11 @@ where Track.Name like 'shock me'
 select Top 5 count(1) as TimesSold, InvoiceLine.TrackId, Track.Name
 from InvoiceLine
 	join Track
-	on InvoiceLine.TrackId = Track.TrackId
+		on InvoiceLine.TrackId = Track.TrackId
 group by invoiceLine.TrackId, track.Name
 order by TimesSold desc
 
---ANCA: suggestion from Nathan below - need to work on it....
+--ANCA: suggestion from Nathan below:
 --select InvoiceLine.TrackId
 --from InvoiceLine
 --where InvoiceLine.TrackId = (select Top 1 count(1) TimesSold
@@ -259,11 +258,11 @@ select top 3 count(1) as TracksSold, sum(InvoiceLine.UnitPrice * InvoiceLine.Qua
 --select *
 from InvoiceLine
 	join Track
-	on InvoiceLine.TrackId = Track.TrackId
-		join Album
-		on Track.AlbumId = Album.AlbumId
-			join Artist
-			on Album.ArtistId = Artist.ArtistId
+		on InvoiceLine.TrackId = Track.TrackId
+			join Album
+				on Track.AlbumId = Album.AlbumId
+					join Artist
+						on Album.ArtistId = Artist.ArtistId
 group by Artist.ArtistId, Artist.Name
 --order by TotalSalesByArtist desc
 order by 2 desc --ANCA: You can also order using the column number for the column you want to use!!!
@@ -280,7 +279,7 @@ where UnitPrice != '0.99'
 select count(1) as TimesSold, MediaType.Name
 from InvoiceLine
 	join Track
-	on InvoiceLine.TrackId = Track.TrackId
-		join MediaType
-		on Track.MediaTypeId = MediaType.MediaTypeId
+		on InvoiceLine.TrackId = Track.TrackId
+			join MediaType
+				on Track.MediaTypeId = MediaType.MediaTypeId
 group by Track.MediaTypeId, MediaType.Name
